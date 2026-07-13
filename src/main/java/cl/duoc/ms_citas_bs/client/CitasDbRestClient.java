@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "citas-db", url = "http://localhost:8092/api/v1/citas")
+@FeignClient(name = "citas-db", url = "${citas-db.url:http://localhost:8092/api/v1/citas}")
 public interface CitasDbRestClient {
 
     @PostMapping
