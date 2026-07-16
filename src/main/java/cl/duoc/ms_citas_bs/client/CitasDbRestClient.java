@@ -11,14 +11,17 @@ import java.util.List;
 public interface CitasDbRestClient {
 
     @PostMapping
-    public void guardarCita(@RequestBody CitaDTO citaDTO);
+    CitaDTO guardarCita(@RequestBody CitaDTO citaDTO);
 
     @GetMapping
-    public List<CitaDTO> obtenerCitas();
+    List<CitaDTO> obtenerCitas();
 
-    @DeleteMapping
-    public void eliminarCita(Long id);
+    @GetMapping("/{id}")
+    CitaDTO obtenerCitaPorId(@PathVariable("id") Long id);
+
+    @DeleteMapping("/{id}")
+    void eliminarCita(@PathVariable("id") Long id);
 
     @PutMapping
-    public CitaUpdateDTO actualizarCita(@RequestBody CitaUpdateDTO cita);
+    CitaUpdateDTO actualizarCita(@RequestBody CitaUpdateDTO cita);
 }
