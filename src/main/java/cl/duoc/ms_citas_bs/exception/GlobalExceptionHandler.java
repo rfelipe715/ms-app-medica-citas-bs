@@ -1,6 +1,8 @@
 package cl.duoc.ms_citas_bs.exception;
 
 import feign.FeignException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -15,15 +17,19 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     // Captura cuando una cita no existe (404)
     @ExceptionHandler(CitaNotFoundException.class)
     public ResponseEntity<Map<String, Object>> manejarCitaNoEncontrada(CitaNotFoundException ex) {
+        log.warn("404 - {}", ex.getMessage());
         return construirRespuesta(HttpStatus.NOT_FOUND, "Cita no encontrada", ex.getMessage());
     }
 
     // Captura cuando falla una validación de @Valid (400)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> manejarErroresDeValidacion(MethodArgumentNotValidException ex) {
+        log.warn("400 - Validación fallida: {}", ex.getMessage());
         Map<String, String> errores = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String campo = ((FieldError) error).getField();
@@ -41,12 +47,14 @@ public class GlobalExceptionHandler {
     // Propaga un 404 real desde ms-citas-db (p.ej. si se detectó tarde, tras un cambio de estado externo)
     @ExceptionHandler(FeignException.NotFound.class)
     public ResponseEntity<Map<String, Object>> manejarNoEncontradoRemoto(FeignException.NotFound ex) {
+        log.warn("404 - Recurso no encontrado en servicio remoto: {}", ex.getMessage());
         return construirRespuesta(HttpStatus.NOT_FOUND, "Recurso no encontrado", "El servicio remoto no encontró el recurso solicitado.");
     }
 
     // Cualquier otra falla de comunicación con ms-citas-db / ms-pacientes-bs (timeout, 500, conexión rechazada, etc.)
     @ExceptionHandler(ServicioNoDisponibleException.class)
     public ResponseEntity<Map<String, Object>> manejarServicioNoDisponible(ServicioNoDisponibleException ex) {
+        log.error("502 - {}", ex.getMessage());
         return construirRespuesta(HttpStatus.BAD_GATEWAY, "Servicio no disponible", ex.getMessage());
     }
 
